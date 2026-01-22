@@ -1,0 +1,11 @@
+username,password,rol
+"admin_clinica","AdminDental2024","admin"
+"dra_martinez","DentalPedia24","medico"
+"dr_sanchez","CirugiaOral24","medico"
+"secretaria_laura","SecreDental24","secretaria"
+"recepcion_carlos","RecepDental24","secretaria"
+"paciente_juan","Paciente123","paciente"
+"paciente_maria","Paciente456","paciente"
+"paciente_carlos","Paciente789","paciente"
+"gerente_clinica","GerenteDental24","admin"
+"auxiliar_sofia","AuxiDental24","secretaria"

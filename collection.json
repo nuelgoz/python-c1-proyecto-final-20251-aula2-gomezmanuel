@@ -1,0 +1,1042 @@
+{
+  "info": {
+    "_postman_id": "odonto-care-collection-v2",
+    "name": "OdontoCare - Admin & Citas Services",
+    "description": "Colección de Postman para probar los servicios de OdontoCare: Admin Service (gestión de usuarios, pacientes, doctores y centros) y Citas Service (gestión de citas médicas).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "odonto-care-demo"
+  },
+  "variable": [
+    {
+      "key": "admin_base_url",
+      "value": "http://localhost:8000",
+      "description": "URL base del servicio de administración"
+    },
+    {
+      "key": "citas_base_url",
+      "value": "http://localhost:8001",
+      "description": "URL base del servicio de citas"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "description": "Token de autenticación JWT (se establece automáticamente en el login)"
+    },
+    {
+      "key": "paciente_id",
+      "value": "1",
+      "description": "ID de paciente de ejemplo"
+    },
+    {
+      "key": "doctor_id",
+      "value": "1",
+      "description": "ID de doctor de ejemplo"
+    },
+    {
+      "key": "centro_id",
+      "value": "1",
+      "description": "ID de centro de ejemplo"
+    },
+    {
+      "key": "cita_id",
+      "value": "1",
+      "description": "ID de cita de ejemplo"
+    }
+  ],
+  "item": [
+    {
+      "name": "Admin Service",
+      "description": "Endpoints del servicio de administración (usuarios, pacientes, doctores, centros)",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{admin_base_url}}/health",
+              "host": ["{{admin_base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica que el servicio de admin esté funcionando correctamente"
+          }
+        },
+        {
+          "name": "Authentication",
+          "item": [
+            {
+              "name": "Register User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\",\n  \"rol\": \"admin\"\n}"
+                },
+                "url": {
+                  "raw": "{{admin_base_url}}/auth/register",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["auth", "register"]
+                },
+                "description": "Registra un nuevo usuario en el sistema"
+              }
+            },
+            {
+              "name": "Login",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+                },
+                "url": {
+                  "raw": "{{admin_base_url}}/auth/login",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Inicia sesión y obtiene el token JWT"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.access_token) {",
+                      "    pm.collectionVariables.set(\"token\", jsonData.access_token);",
+                      "    console.log(\"Token guardado en collection variables\");",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Verify Token",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/auth/verify",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["auth", "verify"]
+                },
+                "description": "Verifica que el token JWT sea válido"
+              }
+            },
+            {
+              "name": "Verify Token (Alternative Endpoint)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/verify/token",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["verify", "token"]
+                },
+                "description": "Endpoint alternativo para verificar el token JWT"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pacientes",
+          "item": [
+            {
+              "name": "Crear Paciente",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Juan Pérez García\",\n  \"telefono\": \"+34 612 345 678\"\n}"
+                },
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/pacientes",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "pacientes"]
+                },
+                "description": "Crea un nuevo paciente en el sistema. Requiere rol admin."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.paciente && jsonData.paciente.id) {",
+                      "    pm.collectionVariables.set(\"paciente_id\", jsonData.paciente.id);",
+                      "    console.log(\"ID de paciente guardado: \" + jsonData.paciente.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Listar Pacientes",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/pacientes?estado=ACTIVO&nombre=&page=1&per_page=10",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "pacientes"],
+                  "query": [
+                    {
+                      "key": "estado",
+                      "value": "ACTIVO",
+                      "description": "Estado del paciente (ACTIVO/INACTIVO)"
+                    },
+                    {
+                      "key": "nombre",
+                      "value": "",
+                      "description": "Filtro por nombre (búsqueda parcial)"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Número de página para paginación"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "10",
+                      "description": "Resultados por página"
+                    }
+                  ]
+                },
+                "description": "Lista todos los pacientes con filtros y paginación. Requiere rol admin."
+              }
+            },
+            {
+              "name": "Obtener Paciente por ID",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/pacientes/:paciente_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "pacientes", ":paciente_id"],
+                  "variable": [
+                    {
+                      "key": "paciente_id",
+                      "value": "{{paciente_id}}"
+                    }
+                  ]
+                },
+                "description": "Obtiene los detalles de un paciente específico por su ID"
+              }
+            },
+            {
+              "name": "Actualizar Paciente",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Juan Pérez García\",\n  \"telefono\": \"+34 612 345 678\",\n  \"estado\": \"ACTIVO\"\n}"
+                },
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/pacientes/:paciente_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "pacientes", ":paciente_id"],
+                  "variable": [
+                    {
+                      "key": "paciente_id",
+                      "value": "{{paciente_id}}"
+                    }
+                  ]
+                },
+                "description": "Actualiza los datos de un paciente existente"
+              }
+            },
+            {
+              "name": "Eliminar Paciente (Soft Delete)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/pacientes/:paciente_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "pacientes", ":paciente_id"],
+                  "variable": [
+                    {
+                      "key": "paciente_id",
+                      "value": "{{paciente_id}}"
+                    }
+                  ]
+                },
+                "description": "Inactiva un paciente (soft delete, cambia estado a INACTIVO)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Doctores",
+          "item": [
+            {
+              "name": "Crear Doctor",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Dra. María López\",\n  \"especialidad\": \"Odontología General\"\n}"
+                },
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/doctores",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "doctores"]
+                },
+                "description": "Crea un nuevo doctor en el sistema. Requiere rol admin."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.doctor && jsonData.doctor.id) {",
+                      "    pm.collectionVariables.set(\"doctor_id\", jsonData.doctor.id);",
+                      "    console.log(\"ID de doctor guardado: \" + jsonData.doctor.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Listar Doctores",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/doctores?estado=ACTIVO&nombre=&especialidad=&page=1&per_page=10",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "doctores"],
+                  "query": [
+                    {
+                      "key": "estado",
+                      "value": "ACTIVO",
+                      "description": "Estado del doctor (ACTIVO/INACTIVO)"
+                    },
+                    {
+                      "key": "nombre",
+                      "value": "",
+                      "description": "Filtro por nombre (búsqueda parcial)"
+                    },
+                    {
+                      "key": "especialidad",
+                      "value": "",
+                      "description": "Filtro por especialidad (búsqueda parcial)"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Número de página para paginación"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "10",
+                      "description": "Resultados por página"
+                    }
+                  ]
+                },
+                "description": "Lista todos los doctores con filtros y paginación. Requiere rol admin."
+              }
+            },
+            {
+              "name": "Obtener Doctor por ID",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/doctores/:doctor_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "doctores", ":doctor_id"],
+                  "variable": [
+                    {
+                      "key": "doctor_id",
+                      "value": "{{doctor_id}}"
+                    }
+                  ]
+                },
+                "description": "Obtiene los detalles de un doctor específico por su ID"
+              }
+            },
+            {
+              "name": "Actualizar Doctor",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Dra. María López\",\n  \"especialidad\": \"Odontología General\",\n  \"estado\": \"ACTIVO\"\n}"
+                },
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/doctores/:doctor_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "doctores", ":doctor_id"],
+                  "variable": [
+                    {
+                      "key": "doctor_id",
+                      "value": "{{doctor_id}}"
+                    }
+                  ]
+                },
+                "description": "Actualiza los datos de un doctor existente"
+              }
+            },
+            {
+              "name": "Eliminar Doctor (Soft Delete)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/doctores/:doctor_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "doctores", ":doctor_id"],
+                  "variable": [
+                    {
+                      "key": "doctor_id",
+                      "value": "{{doctor_id}}"
+                    }
+                  ]
+                },
+                "description": "Inactiva un doctor (soft delete, cambia estado a INACTIVO)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Centros",
+          "item": [
+            {
+              "name": "Crear Centro",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Clínica Dental Central\",\n  \"direccion\": \"Calle Mayor 123, Madrid\"\n}"
+                },
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/centros",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "centros"]
+                },
+                "description": "Crea un nuevo centro médico en el sistema. Requiere rol admin."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.centro && jsonData.centro.id) {",
+                      "    pm.collectionVariables.set(\"centro_id\", jsonData.centro.id);",
+                      "    console.log(\"ID de centro guardado: \" + jsonData.centro.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Listar Centros",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/centros?estado=ACTIVO&nombre=&direccion=&page=1&per_page=10",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "centros"],
+                  "query": [
+                    {
+                      "key": "estado",
+                      "value": "ACTIVO",
+                      "description": "Estado del centro (ACTIVO/INACTIVO)"
+                    },
+                    {
+                      "key": "nombre",
+                      "value": "",
+                      "description": "Filtro por nombre (búsqueda parcial)"
+                    },
+                    {
+                      "key": "direccion",
+                      "value": "",
+                      "description": "Filtro por dirección (búsqueda parcial)"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Número de página para paginación"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "10",
+                      "description": "Resultados por página"
+                    }
+                  ]
+                },
+                "description": "Lista todos los centros con filtros y paginación. Requiere rol admin."
+              }
+            },
+            {
+              "name": "Obtener Centro por ID",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/centros/:centro_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "centros", ":centro_id"],
+                  "variable": [
+                    {
+                      "key": "centro_id",
+                      "value": "{{centro_id}}"
+                    }
+                  ]
+                },
+                "description": "Obtiene los detalles de un centro específico por su ID"
+              }
+            },
+            {
+              "name": "Actualizar Centro",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Clínica Dental Central\",\n  \"direccion\": \"Calle Mayor 123, Madrid\",\n  \"estado\": \"ACTIVO\"\n}"
+                },
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/centros/:centro_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "centros", ":centro_id"],
+                  "variable": [
+                    {
+                      "key": "centro_id",
+                      "value": "{{centro_id}}"
+                    }
+                  ]
+                },
+                "description": "Actualiza los datos de un centro existente"
+              }
+            },
+            {
+              "name": "Eliminar Centro (Soft Delete)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/admin/centros/:centro_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["admin", "centros", ":centro_id"],
+                  "variable": [
+                    {
+                      "key": "centro_id",
+                      "value": "{{centro_id}}"
+                    }
+                  ]
+                },
+                "description": "Inactiva un centro (soft delete, cambia estado a INACTIVO)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verification Endpoints (For Inter-Service Communication)",
+          "item": [
+            {
+              "name": "Verificar Paciente",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/verify/pacientes/:paciente_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["verify", "pacientes", ":paciente_id"],
+                  "variable": [
+                    {
+                      "key": "paciente_id",
+                      "value": "{{paciente_id}}"
+                    }
+                  ]
+                },
+                "description": "Verifica que exista un paciente activo. Usado por citas_service."
+              }
+            },
+            {
+              "name": "Verificar Doctor",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/verify/doctores/:doctor_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["verify", "doctores", ":doctor_id"],
+                  "variable": [
+                    {
+                      "key": "doctor_id",
+                      "value": "{{doctor_id}}"
+                    }
+                  ]
+                },
+                "description": "Verifica que exista un doctor activo. Usado por citas_service."
+              }
+            },
+            {
+              "name": "Verificar Centro",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{admin_base_url}}/verify/centros/:centro_id",
+                  "host": ["{{admin_base_url}}"],
+                  "path": ["verify", "centros", ":centro_id"],
+                  "variable": [
+                    {
+                      "key": "centro_id",
+                      "value": "{{centro_id}}"
+                    }
+                  ]
+                },
+                "description": "Verifica que exista un centro activo. Usado por citas_service."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Citas Service",
+      "description": "Endpoints del servicio de citas médicas",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{citas_base_url}}/health",
+              "host": ["{{citas_base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica que el servicio de citas esté funcionando correctamente"
+          }
+        },
+        {
+          "name": "Crear Cita",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2025-01-20T10:00:00\",\n  \"motivo\": \"Revisión general\",\n  \"id_paciente\": {{paciente_id}},\n  \"id_doctor\": {{doctor_id}},\n  \"id_centro\": {{centro_id}}\n}"
+            },
+            "url": {
+              "raw": "{{citas_base_url}}/citas",
+              "host": ["{{citas_base_url}}"],
+              "path": ["citas"]
+            },
+            "description": "Crea una nueva cita médica. Verifica la existencia de paciente, doctor y centro en admin_service."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.cita && jsonData.cita.id) {",
+                  "    pm.collectionVariables.set(\"cita_id\", jsonData.cita.id);",
+                  "    console.log(\"ID de cita guardado: \" + jsonData.cita.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Citas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{citas_base_url}}/citas?fecha_inicio=&fecha_fin=&id_doctor=&id_centro=&estado=&id_paciente=",
+              "host": ["{{citas_base_url}}"],
+              "path": ["citas"],
+              "query": [
+                {
+                  "key": "fecha_inicio",
+                  "value": "",
+                  "description": "Fecha de inicio (formato ISO: YYYY-MM-DDTHH:MM:SS)"
+                },
+                {
+                  "key": "fecha_fin",
+                  "value": "",
+                  "description": "Fecha de fin (formato ISO: YYYY-MM-DDTHH:MM:SS)"
+                },
+                {
+                  "key": "id_doctor",
+                  "value": "",
+                  "description": "ID del doctor (solo para admin)"
+                },
+                {
+                  "key": "id_centro",
+                  "value": "",
+                  "description": "ID del centro (solo para admin)"
+                },
+                {
+                  "key": "estado",
+                  "value": "",
+                  "description": "Estado de la cita: PROGRAMADA, COMPLETADA, CANCELADA"
+                },
+                {
+                  "key": "id_paciente",
+                  "value": "",
+                  "description": "ID del paciente (solo para admin)"
+                }
+              ]
+            },
+            "description": "Lista citas con filtros según el rol del usuario:\n- Doctor: ve solo sus citas\n- Secretaria: puede filtrar por fecha\n- Admin: puede usar todos los filtros\n- Paciente: ve solo sus citas"
+          }
+        },
+        {
+          "name": "Obtener Cita por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{citas_base_url}}/citas/:cita_id",
+              "host": ["{{citas_base_url}}"],
+              "path": ["citas", ":cita_id"],
+              "variable": [
+                {
+                  "key": "cita_id",
+                  "value": "{{cita_id}}"
+                }
+              ]
+            },
+            "description": "Obtiene los detalles de una cita específica por su ID"
+          }
+        },
+        {
+          "name": "Cancelar Cita",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{citas_base_url}}/citas/:cita_id",
+              "host": ["{{citas_base_url}}"],
+              "path": ["citas", ":cita_id"],
+              "variable": [
+                {
+                  "key": "cita_id",
+                  "value": "{{cita_id}}"
+                }
+              ]
+            },
+            "description": "Cancela una cita existente. Solo roles Admin y Secretaria pueden cancelar citas."
+          }
+        }
+      ]
+    }
+  ]
+}

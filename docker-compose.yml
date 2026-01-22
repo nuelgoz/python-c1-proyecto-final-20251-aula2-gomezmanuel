@@ -1,0 +1,59 @@
+name: odontocare
+
+services:
+  admin_service:
+    build:
+      context: ./odontocare/admin_service
+      dockerfile: Dockerfile
+    container_name: odontocare_admin_service
+    ports:
+      - "8000:8000"
+    networks:
+      - odontocare_net
+    volumes:
+      - admin_service_logs:/app/logs
+      - admin_service_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  citas_service:
+    build:
+      context: ./odontocare/citas_service
+      dockerfile: Dockerfile
+    container_name: odontocare_citas_service
+    ports:
+      - "8001:8001"
+    depends_on:
+      admin_service:
+        condition: service_healthy
+    networks:
+      - odontocare_net
+    environment:
+      - ADMIN_SERVICE_URL=http://admin_service:8000
+    volumes:
+      - citas_service_logs:/app/logs
+      - citas_service_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  odontocare_net:
+    driver: bridge
+
+volumes:
+  admin_service_logs:
+    driver: local
+  admin_service_data:
+    driver: local
+  citas_service_logs:
+    driver: local
+  citas_service_data:
+    driver: local
